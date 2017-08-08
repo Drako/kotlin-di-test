@@ -1,7 +1,6 @@
 package guru.drako.ditest
 
 import kotlin.reflect.KClass
-import kotlin.reflect.full.createInstance
 import kotlin.reflect.jvm.jvmErasure
 import kotlin.system.exitProcess
 
@@ -12,9 +11,6 @@ class Main {
     fun <Requested: Any, Resolved: Requested> bind(requested: KClass<Requested>, resolved: KClass<Resolved>)
       = binding.put(requested, resolved)
 
-    private val <T: Any> KClass<T>.isDefaultConstructible: Boolean
-      get() = constructors.any { ctor -> ctor.parameters.isEmpty() }
-
     fun <T: Any> resolve(clazz: KClass<T>): T {
       val actualType = binding[clazz]
       if (actualType != null) {
@@ -23,10 +19,6 @@ class Main {
         // also the cast should never fail as the bind function only accepts parameters that fulfill the requirements
         @Suppress("UNCHECKED_CAST")
         return resolve(actualType as KClass<T>)
-      }
-
-      if (clazz.isDefaultConstructible) {
-        return clazz.createInstance()
       }
 
       val sortedConstructors = clazz.constructors.sortedBy { ctor -> ctor.parameters.size }
