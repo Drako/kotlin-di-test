@@ -49,32 +49,9 @@ class Context {
   infix fun <T: Any> KClass<T>.named(name: String) = Aliased(this, name)
 
   fun <T: Any> resolve(clazz: KClass<T>, name: String = ""): T {
-    val provider = bindings[BindingKey(clazz, name)]
-    if (provider != null) {
-      @Suppress("UNCHECKED_CAST")
-      return provider.provideInstance() as T
-    }
+    val provider = bindings[BindingKey(clazz, name)] ?: FactoryProvider(this, clazz)
 
-    val sortedConstructors = clazz.constructors.sortedBy { ctor -> ctor.parameters.size }
-    for (ctor in sortedConstructors) {
-      val args = try {
-        ctor.parameters.map { arg ->
-          try {
-            resolve(arg.type.jvmErasure)
-          } catch (ex: RuntimeException) {
-            if (arg.type.isMarkedNullable) null else throw ex
-          }
-        }.toTypedArray()
-      }
-      catch (ex: RuntimeException) {
-        null
-      }
-
-      if (args != null) {
-        return ctor.call(*args)
-      }
-    }
-
-    throw RuntimeException("Could not resolve $clazz!")
+    @Suppress("UNCHECKED_CAST")
+    return provider.provideInstance() as T
   }
 }
