@@ -1,5 +1,5 @@
 package guru.drako.ditest
 
 interface Writer {
-  fun write(message: String)
+  fun writeln(message: String)
 }
