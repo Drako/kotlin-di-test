@@ -31,7 +31,7 @@ class FactoryProvider<T: Any>(val context: Context, val clazz: KClass<T>): Provi
     throw RuntimeException("Could not resolve $clazz!")
   }
 
-  infix fun String.aka(name: String) {
+  infix fun String.providedBy(name: String) {
     aliases.put(this, name)
   }
 }

@@ -22,6 +22,11 @@ class Context {
 
   infix fun <Requested: Any, Resolved: Requested> KClass<Resolved>.provides(requested: KClass<Requested>):
       FactoryProvider<Resolved> {
+    val name = annotations.find { it.annotationClass == Named::class }
+    if (name != null && name is Named) {
+      return provides(Aliased(requested, name.name))
+    }
+
     val provider = FactoryProvider(this@Context, this)
     bindings.put(BindingKey(requested), provider)
     return provider
@@ -39,6 +44,12 @@ class Context {
   }
 
   infix fun <Resolved: Any> Resolved.provides(requested: KClass<out Resolved>) {
+    val name = this::class.annotations.find { it.annotationClass == Named::class }
+    if (name != null && name is Named) {
+      provides(Aliased(requested, name.name))
+      return
+    }
+
     bindings.put(BindingKey(requested), InstanceProvider(this))
   }
 
@@ -46,7 +57,7 @@ class Context {
     bindings.put(BindingKey(requested.requested, requested.name), InstanceProvider(this))
   }
 
-  infix fun <T: Any> KClass<T>.named(name: String) = Aliased(this, name)
+  infix fun <T: Any> KClass<T>.byName(name: String) = Aliased(this, name)
 
   fun <T: Any> resolve(clazz: KClass<T>, name: String = ""): T {
     val provider = bindings[BindingKey(clazz, name)] ?: FactoryProvider(this, clazz)

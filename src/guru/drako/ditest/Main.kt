@@ -9,14 +9,16 @@ class Main {
       val lang = if (args.isNotEmpty()) args[0] else "en"
 
       val ctx = Context.configure {
-        ConsoleWriter() provides Writer::class.named("stdout")
+        ConsoleWriter() provides Writer::class.byName("stdout")
 
-        EnglishMessageSource() provides MessageSource::class.named("en")
-        GermanMessageSource() provides MessageSource::class.named("de")
+        // name of instances is comfortably set via @Named on the classes themselves
+        // it can still be overwritten using .byName as shown above.
+        EnglishMessageSource() provides MessageSource::class
+        GermanMessageSource() provides MessageSource::class
 
         HelloWorldProgram::class provides Executable::class with {
-          "writer" aka "stdout"
-          "messageSource" aka lang
+          "writer" providedBy "stdout"
+          "messageSource" providedBy lang
         }
       }
 
