@@ -1,4 +1,4 @@
 package guru.drako.ditest
 
-@Target(AnnotationTarget.CLASS, AnnotationTarget.LOCAL_VARIABLE, AnnotationTarget.FIELD)
+@Target(AnnotationTarget.CLASS)
 annotation class Named(val name: String)
